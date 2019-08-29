@@ -47,9 +47,11 @@ CREATE TABLE `tbl_follow_up` (
   `fol_panId` int(8) unsigned DEFAULT NULL,
   `fol_empId` int(8) unsigned DEFAULT NULL,
   PRIMARY KEY (`fol_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 /*Data for the table `tbl_follow_up` */
+
+insert  into `tbl_follow_up`(`fol_id`,`fol_status`,`fol_notes`,`fol_panId`,`fol_empId`) values (00000001,'Accepted',NULL,21,1),(00000002,'Accepted',NULL,21,1),(00000003,'Accepted',NULL,21,1);
 
 /*Table structure for table `tbl_panic` */
 
@@ -58,15 +60,15 @@ DROP TABLE IF EXISTS `tbl_panic`;
 CREATE TABLE `tbl_panic` (
   `pan_id` int(8) unsigned zerofill NOT NULL AUTO_INCREMENT,
   `pan_location` varchar(100) DEFAULT NULL,
-  `pan_date` datetime DEFAULT NULL,
+  `pan_date` date DEFAULT NULL,
   `pan_time` varchar(10) DEFAULT NULL,
   `pan_userId` int(8) unsigned DEFAULT NULL,
   PRIMARY KEY (`pan_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 
 /*Data for the table `tbl_panic` */
 
-insert  into `tbl_panic`(`pan_id`,`pan_location`,`pan_date`,`pan_time`,`pan_userId`) values (00000001,'Joburg,Wynberg, Sandton,2000 ','0000-00-00 00:00:00','',1),(00000002,'Joburg,Wynberg, Sandton,2000 ','0000-00-00 00:00:00','',2),(00000006,'Joburg,Wynberg, Sandton,2000 ','0000-00-00 00:00:00','',2),(00000007,'Joburg,Wynberg, Sandton,2000 ','0000-00-00 00:00:00','',2),(00000008,'Joburg,Wynberg, Sandton,2000 ','0000-00-00 00:00:00','',NULL),(00000009,'Joburg,Wynberg, Sandton,2000 ','0000-00-00 00:00:00','',1);
+insert  into `tbl_panic`(`pan_id`,`pan_location`,`pan_date`,`pan_time`,`pan_userId`) values (00000021,'Joburg,Wynberg, Sandton,2000 ','2019-08-28','12:29:50pm',1);
 
 /*Table structure for table `tbl_user` */
 
@@ -105,6 +107,23 @@ CREATE TABLE `tbl_vehicle` (
 
 insert  into `tbl_vehicle`(`veh_id`,`veh_regNo`,`veh_make`,`veh_model`,`veh_userId`) values (00000001,'564-MVV-GP','Toyota','Hilux',1),(00000002,'342-WER-MP','BM','M4',2);
 
+/* Procedure structure for procedure `accept` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `accept` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `accept`(
+IN pemail VARCHAR(100),
+IN ppanid INT(8)
+)
+BEGIN
+	DECLARE v_empId INT(8);
+	SELECT emp_id INTO v_empId FROM tbl_employee WHERE emp_email = pemail;
+	INSERT INTO tbl_follow_up(fol_status,fol_panId,fol_empId) VALUES('Accepted',ppanid,v_empId);
+    END */$$
+DELIMITER ;
+
 /* Procedure structure for procedure `get_panic` */
 
 /*!50003 DROP PROCEDURE IF EXISTS  `get_panic` */;
@@ -113,7 +132,7 @@ DELIMITER $$
 
 /*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `get_panic`()
 BEGIN
-	SELECT pa.pan_id pan_id,CONCAT(us.user_fullname,' ',us.user_surname) user_name, CONCAT(ve.veh_make,' ',ve.veh_model) user_vehicle,us.user_cell user_cell,pa.pan_location user_location
+	SELECT pa.pan_id pan_id,CONCAT(us.user_fullname,' ',us.user_surname) user_name, CONCAT(ve.veh_make,' ',ve.veh_model,' | ',ve.veh_regNo) user_vehicle,us.user_cell user_cell,pa.pan_location user_location
 	FROM tbl_panic pa
 	INNER JOIN tbl_user us
 	ON pa.pan_userId = us.user_id
